@@ -1,3 +1,3 @@
 [submodule "IlsSaasCommon"]
 	path = IlsSaasCommon
-	url = ./IlsSaasCommon
+	url = ./IlsSaasCommon.git
