@@ -1,0 +1,6 @@
+[submodule "IlsSaasMonitoringBE"]
+	path = IlsSaasMonitoringBE
+	url = ../IlsSaasMonitoringBE.git
+[submodule "ILS_Astar_MapEditor"]
+	path = ILS_Astar_MapEditor
+	url = ../ILS_Astar_MapEditor.git
