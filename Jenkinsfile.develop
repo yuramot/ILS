@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    options {
+        timeout(time: 1, unit: 'HOURS') 
+        disableConcurrentBuilds()
+    }
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building..'
+                bat 'prebuild.cmd'
+                bat 'build.cmd Debug'
+                bat 'build_tests.cmd Debug'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing..'
+                bat 'run_tests.cmd'
+            }
+        }
+        stage('Archive') {
+            steps {
+                echo 'Archiving artifacts..'
+                bat 'zip_build.cmd Develop'
+            }
+        }
+    }
+    post {
+        always {
+//            nunit testResultsPattern: '*.xml'
+            // nunit testResultsPattern: 'bin\\TestReports\\*.xml'
+            nunit testResultsPattern: 'dunit\\report\\*.xml'
+//            xunit (
+//                thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
+//                tools: [ nunit(pattern: 'dunit\\report\\*.xml') ]
+//            )
+            //zip zipFile: 'Release.zip', glob: '*.exe', dir:'bin/Release/', archive: true 
+            archiveArtifacts '*.zip'
+            //archiveArtifacts 'bin/Release/Release.zip'
+            //nunit testResultsPattern: 'bin/ILS Monitoring Server Test/ReleaseConsole/dunit-report.xml'
+        }        
+        changed {
+            script {
+//                if (currentBuild.currentResult == 'FAILURE') { // Other values: SUCCESS, UNSTABLE
+                    // Send an email only if the build status has changed from green/unstable to red
+                    emailext subject: '$DEFAULT_SUBJECT',
+                                      body: '$DEFAULT_CONTENT',
+                        recipientProviders: [
+                                                [$class: 'CulpritsRecipientProvider'],
+                                                [$class: 'DevelopersRecipientProvider'],
+                                                [$class: 'RequesterRecipientProvider']
+                                            ], 
+                                   replyTo: '$DEFAULT_REPLYTO',
+                                        to: '$DEFAULT_RECIPIENTS'
+//                }
+            }
+        }
+    }
+}
